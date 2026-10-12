@@ -73,7 +73,7 @@ function replyTo(message,person,state){
  else if(matched){answer=pick([...subjectLines[subject],...followupAnswers[subject]]);if(state.favorite&&state.turn%4===0)answer+=' u mentioned '+state.favorite+' before too';state.asked=subject;}
  else if(/\?$/.test(text)){answer=pick(['hmm. '+p.opinion+'. what do u think?','not totally sure. '+p.questions[0],p.intro+'. does that answer it?']);state.asked=subject;}
  else if(text.length>18){answer=pick(['wait, '+text.split(/\s+/).slice(0,5).join(' ')+'... tell me more about that','thats interesting. '+p.questions[0],'ok now i need the rest of the story lol']);state.asked=subject;}
- else answer=pick([p.intro,p.opinion,p.questions[0],...subjectLines[subject]||subjectLines.life]);
+ else answer=pick([p.intro,p.opinion,p.questions[0],...(subjectLines[subject]||subjectLines.life)]);
  state.subject=subject;
  return answer;
 }
