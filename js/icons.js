@@ -2,6 +2,7 @@
 window.Y2K = { icons: {} };
 (() => {
  const shapes = {
+ paint:'<path fill="#333" d="M2 1h12v13H2z"/><path fill="#fff" d="M3 2h10v11H3z"/><path fill="#000080" d="M3 2h10v2H3z"/><path fill="#ff0000" d="M4 6h3v3H4z"/><path fill="#00a050" d="M8 6h3v3H8z"/><path fill="#ffd000" d="M5 10h3v2H5z"/><path fill="#444" d="M11 5h1v6h-1z"/><path fill="#d99d59" d="M11 10h1v2h-1z"/>',
  messenger:'<path fill="#202020" d="M1 2h12v8H7l-3 3v-3H1zM5 7h10v7h-3v2l-3-2H5z"/><path fill="#ffda32" d="M2 3h10v6H6l-1 2V9H2z"/><path fill="#fafafa" d="M6 8h8v5h-3v1l-2-1H6z"/><path fill="#204080" d="M3 5h7v1H3zM7 10h5v1H7z"/>',
  computer:'<path fill="#333" d="M2 1h12v10H2z"/><path fill="#c0c0c0" d="M3 2h10v8H3zM6 11h4v2H6zM1 13h14v2H1z"/><path fill="#008080" d="M4 3h8v6H4z"/><path fill="#fff" d="M4 3h1v5H4zM2 13h11v1H2z"/>',
  notepad:'<path fill="#333" d="M3 1h11v14H3z"/><path fill="#fff" d="M4 2h9v12H4z"/><path fill="#000080" d="M2 2h2v2H2zM2 6h2v2H2zM2 10h2v2H2z"/><path stroke="#808080" d="M6 5h5M6 7h5M6 9h5M6 11h3"/>',
