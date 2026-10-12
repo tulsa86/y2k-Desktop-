@@ -1,6 +1,31 @@
 /* Y2K Amp: original late-90s media player using local browser audio. */
 (()=>{
 let active=null;
+/* A short, original tracker-style loop rendered as a WAV so the normal player controls work. */
+function demoWav(){
+ const rate=11025,bpm=132,beats=64,duration=beats*60/bpm,count=Math.floor(duration*rate);
+ const bytes=new ArrayBuffer(44+count*2),view=new DataView(bytes);
+ const str=(p,s)=>{for(let i=0;i<s.length;i++)view.setUint8(p+i,s.charCodeAt(i));};
+ str(0,'RIFF');view.setUint32(4,36+count*2,true);str(8,'WAVE');str(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,rate,true);view.setUint32(28,rate*2,true);view.setUint16(32,2,true);view.setUint16(34,16,true);str(36,'data');view.setUint32(40,count*2,true);
+ const bass=[55,55,65.406,65.406,73.416,73.416,65.406,65.406],notes=[440,523.25,659.25,523.25,392,493.88,587.33,493.88,349.23,440,523.25,440,392,493.88,587.33,659.25];
+ const twopi=Math.PI*2,beatLength=60/bpm;
+ for(let i=0;i<count;i++){
+  const t=i/rate,beat=t/beatLength,step=Math.floor(beat),phase=beat%1,bar=Math.floor(step/4);
+  const f=bass[Math.floor(step/2)%bass.length],bassEnv=Math.exp(-phase*4);
+  const saw=(t*f)%1*2-1;
+  const kickTime=phase*beatLength,kick=Math.sin(twopi*(58*kickTime+120*(1-Math.exp(-kickTime*22))/22))*Math.exp(-kickTime*19);
+  const hat=((Math.sin(i*2.398)+Math.sin(i*1.1337)*.5+Math.sin(i*.913)*.3)/1.8)*Math.exp(-((beat*2)%1)*13);
+  const snare=(step%4===1||step%4===3)?Math.sin(i*1.719)*Math.exp(-kickTime*24):0;
+  const n=notes[Math.floor(beat*2)%notes.length],melPhase=(beat*2)%1;
+  const melody=bar>=2?Math.sin(twopi*n*t)*Math.exp(-melPhase*6):0;
+  const pad=Math.sin(twopi*f*4*t)*.07;
+  const fade=Math.min(1,t/.5,(duration-t)/.7);
+  const sample=(kick*.34+saw*bassEnv*.16+hat*.055+snare*.12+melody*.15+pad)*Math.max(0,fade);
+  view.setInt16(44+i*2,Math.max(-1,Math.min(1,sample))*32767,true);
+ }
+ return new Blob([bytes],{type:'audio/wav'});
+}
+
 function open(){
  if(active&&document.contains(active.win.el)){Y2K.wm.restore(active.win);return active.win;}
  const tracks=[],audio=new Audio();audio.preload='metadata';
@@ -29,6 +54,7 @@ function open(){
  $('[data-eq]').onclick=e=>{eqOpen=!eqOpen;$('[data-eq-panel]').hidden=!eqOpen;e.currentTarget.setAttribute('aria-expanded',String(eqOpen));if(eqOpen)audioGraph();};
  $('[data-list]').onclick=e=>{playlistOpen=!playlistOpen;root.querySelector('.amp-playlist').hidden=!playlistOpen;e.currentTarget.setAttribute('aria-expanded',String(playlistOpen));};
  $('[data-add]').onclick=()=>$('[data-files]').click();$('[data-files]').onchange=e=>{addFiles(e.target.files);e.target.value='';};$('[data-clear]').onclick=clear;
+ const demoUrl=URL.createObjectURL(demoWav());tracks.push({name:'Y2K Amp - Dial-Up Dreams (Demo)',url:demoUrl});renderList();load(0,false);status.textContent='Demo track ready. Tap Play to listen.';
  audio.addEventListener('timeupdate',update);audio.addEventListener('loadedmetadata',update);audio.addEventListener('ended',()=>next());audio.addEventListener('error',()=>{if(tracks.length)status.textContent='Cannot play this format in this browser.';});visualize();display();return win;
 }
 Y2K.apps.push({id:'winamp',title:'Y2K Amp',icon:'cd',open});
