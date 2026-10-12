@@ -2,12 +2,23 @@
 (() => {
  const desktop=document.getElementById('desktop'),icons=document.getElementById('icons'),menu=document.getElementById('programs-menu'),context=document.getElementById('context-menu'),programs=document.getElementById('programs-button');
  let transient=null;
- Y2K.hideMenus=()=>{menu.hidden=true;context.hidden=true;programs.classList.remove('pressed');programs.setAttribute('aria-expanded','false');if(transient){transient.remove();transient=null;}};
+ const gameIds=new Set(['minesweeper','solitaire','freecell','hearts']);
+ const programItems=document.getElementById('program-items');
+ const gamesEntry=document.createElement('div');gamesEntry.className='games-entry';
+ const gamesToggle=document.createElement('button');gamesToggle.type='button';gamesToggle.className='games-toggle';gamesToggle.setAttribute('aria-expanded','false');gamesToggle.innerHTML=Y2K.icon('folder')+'<span>Games</span><span class="games-arrow">▸</span>';
+ const gamesSubmenu=document.createElement('div');gamesSubmenu.className='games-submenu';gamesSubmenu.hidden=true;gamesSubmenu.setAttribute('aria-label','Games');
+ gamesEntry.append(gamesToggle,gamesSubmenu);
+ function closeGames(){gamesSubmenu.hidden=true;gamesToggle.setAttribute('aria-expanded','false');}
+ gamesToggle.onclick=e=>{e.stopPropagation();const open=gamesSubmenu.hidden;gamesSubmenu.hidden=!open;gamesToggle.setAttribute('aria-expanded',String(open));if(open)gamesSubmenu.querySelector('button')?.focus();};
+ gamesToggle.onkeydown=e=>{if(e.key==='ArrowRight'){e.preventDefault();gamesSubmenu.hidden=false;gamesToggle.setAttribute('aria-expanded','true');gamesSubmenu.querySelector('button')?.focus();}};
+ gamesSubmenu.onkeydown=e=>{if(e.key==='ArrowLeft'){e.preventDefault();closeGames();gamesToggle.focus();}};
+ Y2K.hideMenus=()=>{menu.hidden=true;context.hidden=true;closeGames();programs.classList.remove('pressed');programs.setAttribute('aria-expanded','false');if(transient){transient.remove();transient=null;}};
  Y2K.showPopup=(popup,anchor)=>{Y2K.hideMenus();transient=popup;document.body.append(popup);const r=anchor.getBoundingClientRect();popup.style.left=Math.max(0,Math.min(r.left,innerWidth-popup.offsetWidth))+'px';popup.style.top=Math.max(0,Math.min(r.bottom,desktop.clientHeight-popup.offsetHeight))+'px';popup.querySelector('button')?.focus();};
  function select(b){icons.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));}
  Y2K.apps.forEach(app=>{
- const b=document.createElement('button');b.className='desktop-icon';b.innerHTML=Y2K.icon(app.icon)+'<span></span>';b.querySelector('span').textContent=app.title;b.setAttribute('aria-label','Open '+app.title);b.onclick=()=>select(b);b.ondblclick=()=>Y2K.launch(app.id);b.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();Y2K.launch(app.id);}if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...icons.children];const i=items.indexOf(b);const next=items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length];select(next);next.focus();}};icons.append(b);
- const shortcut=document.createElement('button');shortcut.innerHTML=Y2K.icon(app.icon)+'<span></span>';shortcut.querySelector('span').textContent=app.title;shortcut.onclick=()=>{Y2K.hideMenus();Y2K.launch(app.id);};document.getElementById('program-items').append(shortcut);
+ const isGame=gameIds.has(app.id);
+ const b=document.createElement('button');b.className='desktop-icon';b.innerHTML=Y2K.icon(app.icon)+'<span></span>';b.querySelector('span').textContent=app.title;b.setAttribute('aria-label','Open '+app.title);b.onclick=()=>select(b);b.ondblclick=()=>Y2K.launch(app.id);b.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();Y2K.launch(app.id);}if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const items=[...icons.children];const i=items.indexOf(b);const next=items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length];select(next);next.focus();}};if(!isGame)icons.append(b);
+ const shortcut=document.createElement('button');shortcut.innerHTML=Y2K.icon(app.icon)+'<span></span>';shortcut.querySelector('span').textContent=app.title;shortcut.onclick=()=>{Y2K.hideMenus();Y2K.launch(app.id);};(isGame?gamesSubmenu:programItems).append(shortcut);
  });
  programs.onclick=()=>{const open=menu.hidden;Y2K.hideMenus();menu.hidden=!open;programs.classList.toggle('pressed',open);programs.setAttribute('aria-expanded',String(open));if(open)menu.querySelector('button').focus();};
  document.addEventListener('pointerdown',e=>{if(!e.target.closest('.popup')&&!e.target.closest('#programs-button')&&!e.target.closest('.menubar'))Y2K.hideMenus();if(e.target===desktop||e.target.id==='windows'){select(null);}});
