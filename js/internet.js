@@ -13,9 +13,42 @@ const directory=[
 ['Yahoo!','www.yahoo.com','search portal directory web'],['AltaVista','www.altavista.com','search engine web'],['Google','www.google.com','search engine'],['GeoCities','www.geocities.com','homepage personal community'],['MTV','www.mtv.com','music videos pop culture'],['IGN','www.ign.com','video games gaming nintendo playstation'],['GameSpot','www.gamespot.com','video games reviews'],['Nintendo','www.nintendo.com','nintendo 64 video games'],['PlayStation','www.playstation.com','sony console games'],['Chevrolet','www.chevrolet.com','cars trucks camaro corvette'],['Ford','www.ford.com','cars mustang trucks'],['Car and Driver','www.caranddriver.com','cars reviews automotive'],['CNN','www.cnn.com','news headlines'],['BBC','www.bbc.co.uk','news world'],['Microsoft','www.microsoft.com','windows computer software'],['Apple','www.apple.com','macintosh imac computer'],['Amazon','www.amazon.com','shopping books'],['eBay','www.ebay.com','auction shopping'],['ESPN','www.espn.com','sports football basketball'],['Weather Channel','www.weather.com','weather forecasts']
 ];
 const archiveUrl=(domain,year)=>'https://web.archive.org/web/'+year+'0101id_/http://'+domain;
+
+// Generate a short modem-inspired handshake locally using Web Audio.
+// Starts only after the user taps Connect (required by mobile browsers).
+let audioContext=null,activeAudio=[];
+function silence(){for(const node of activeAudio){try{node.stop();}catch{}}activeAudio=[];}
+function playModem(){
+ silence();
+ const Audio=window.AudioContext||window.webkitAudioContext;
+ if(!Audio)return;
+ try{
+  if(!audioContext)audioContext=new Audio();
+  audioContext.resume().catch(()=>{});
+  const now=audioContext.currentTime+.04;
+  function tone(at,duration,from,to,volume=.09,type='sine'){
+   const osc=audioContext.createOscillator(),gain=audioContext.createGain();
+   osc.type=type;osc.frequency.setValueAtTime(from,now+at);
+   if(to!==from)osc.frequency.exponentialRampToValueAtTime(Math.max(1,to),now+at+duration);
+   gain.gain.setValueAtTime(.0001,now+at);
+   gain.gain.linearRampToValueAtTime(volume,now+at+.015);
+   gain.gain.setValueAtTime(volume,now+at+Math.max(.02,duration-.025));
+   gain.gain.linearRampToValueAtTime(.0001,now+at+duration);
+   osc.connect(gain);gain.connect(audioContext.destination);
+   osc.start(now+at);osc.stop(now+at+duration+.02);activeAudio.push(osc);
+  }
+  // Touch-tone dial pulses, carrier, chirps, then the familiar noisy handshake.
+  const digits=[[697,1209],[697,1336],[770,1477],[852,1209],[770,1336],[697,1477],[852,1336]];
+  digits.forEach(([a,b],i)=>{tone(i*.115,.085,a,a,.045);tone(i*.115,.085,b,b,.045);});
+  tone(.94,.32,440,440,.08);tone(1.32,.4,2100,2100,.08);
+  for(let i=0;i<12;i++){const t=1.78+i*.12;tone(t,.105,i%2?1800:600,i%2?900:2400,.055,'sawtooth');}
+  for(let i=0;i<19;i++){const t=3.16+i*.075;const f=400+(i*337)%2400;tone(t,.07,f,Math.max(80,3000-f),.035,i%3?'square':'sawtooth');}
+ }catch(e){silence();}
+}
+
 function app(){
 let connected=false,stage=0,timer=null,started=0,history=[],position=-1,secret=1,year=1999;
-const win=Y2K.wm.create({title:'Internet Connection',icon:'computer',width:610,height:465,onClose(){clearInterval(timer);},render(w){
+const win=Y2K.wm.create({title:'Internet Connection',icon:'computer',width:610,height:465,onClose(){clearInterval(timer);silence();},render(w){
 w.content.innerHTML=`<div class="net-shell"><div class="net-dial"><h2>Dial-Up Networking</h2><p>Connect to Y2K Online using your 56K modem.</p><div class="net-status" aria-live="polite">Ready to dial.</div><div class="net-actions"><button data-connect>Connect</button><button data-disconnect disabled>Disconnect</button><button data-browse disabled>Browse the Internet</button></div><p class="net-note">Fictional dial-up experience. No real phone calls or network requests.</p></div><div class="net-browser" hidden><div class="net-toolbar"><button data-back title="Back">◀</button><button data-forward title="Forward">▶</button><button data-home title="Home">⌂</button><button data-refresh title="Refresh">↻</button><input data-address aria-label="Web address" value="http://portal.y2k"><button data-go>Go</button></div><div class="net-archive-tools"><label>Year <select data-year aria-label="Archive year"></select></label><button data-time-machine>Time Machine</button><button data-open-archive>Open archived page ↗</button></div><div class="net-page" tabindex="0"></div><div class="net-bottom"><span data-page-status>Done</span><button data-exit>Connection</button></div></div></div>`;
 }});
 const root=win.content, dial=root.querySelector('.net-dial'),browser=root.querySelector('.net-browser'),status=root.querySelector('.net-status'),address=root.querySelector('[data-address]'),page=root.querySelector('.net-page');
@@ -27,8 +60,8 @@ function archiveTarget(){const host=history[position];if(!host||host.endsWith('.
 archiveButton.onclick=()=>{const host=archiveTarget();if(!host){navigate('archive.y2k');return;}window.open(archiveUrl(host,year),'_blank','noopener,noreferrer');};
 root.querySelector('[data-time-machine]').onclick=()=>navigate('archive.y2k');
 const buttons={connect:root.querySelector('[data-connect]'),disconnect:root.querySelector('[data-disconnect]'),browse:root.querySelector('[data-browse]')};
-function stop(){clearInterval(timer);timer=null;connected=false;stage=0;status.textContent='Disconnected.';buttons.connect.disabled=false;buttons.disconnect.disabled=true;buttons.browse.disabled=true;browser.hidden=true;dial.hidden=false;win.setTitle('Internet Connection');}
-buttons.connect.onclick=()=>{if(timer||connected)return;started=Date.now();buttons.connect.disabled=true;buttons.disconnect.disabled=false;const phases=['Dialing 555-0199…','Modem answering…','Negotiating connection…','Verifying username and password…','Connected at 56,000 bps!'];stage=0;status.textContent=phases[0];timer=setInterval(()=>{stage++;status.textContent=phases[Math.min(stage,4)];if(stage>=4){clearInterval(timer);timer=null;connected=true;buttons.browse.disabled=false;}},850);};
+function stop(){silence();clearInterval(timer);timer=null;connected=false;stage=0;status.textContent='Disconnected.';buttons.connect.disabled=false;buttons.disconnect.disabled=true;buttons.browse.disabled=true;browser.hidden=true;dial.hidden=false;win.setTitle('Internet Connection');}
+buttons.connect.onclick=()=>{if(timer||connected)return;playModem();started=Date.now();buttons.connect.disabled=true;buttons.disconnect.disabled=false;const phases=['Dialing 555-0199…','Modem answering…','Negotiating connection…','Verifying username and password…','Connected at 56,000 bps!'];stage=0;status.textContent=phases[0];timer=setInterval(()=>{stage++;status.textContent=phases[Math.min(stage,4)];if(stage>=4){silence();clearInterval(timer);timer=null;connected=true;buttons.browse.disabled=false;}},850);};
 buttons.disconnect.onclick=stop;
 buttons.browse.onclick=()=>{if(!connected)return;dial.hidden=true;browser.hidden=false;win.setTitle('Y2K Internet Explorer');if(position<0)navigate('archive.y2k');else render(history[position]);};
 root.querySelector('[data-exit]').onclick=()=>{browser.hidden=true;dial.hidden=false;win.setTitle('Internet Connection');status.textContent='Connected at 56,000 bps • '+Math.floor((Date.now()-started)/1000)+' seconds online';};
