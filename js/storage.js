@@ -26,7 +26,9 @@ Y2K.settings={
  labels:storedSettings.labels!==false,
  wallpaper:Object.hasOwn(Y2K.wallpapers,storedSettings.wallpaper)?storedSettings.wallpaper:'none',
  scheme:Object.hasOwn(Y2K.schemes,storedSettings.scheme)?storedSettings.scheme:'classic',
- iconSize:storedSettings.iconSize==='small'?'small':'normal'
+ iconSize:storedSettings.iconSize==='small'?'small':'normal',
+ saver:['none','pipes','stars','windows','text'].includes(storedSettings.saver)?storedSettings.saver:'none',
+ saverMinutes:[0,1,2,5,10,15,30].includes(storedSettings.saverMinutes)?storedSettings.saverMinutes:0
 };
 Y2K.applySettings=()=>{
  const root=document.documentElement,desktop=document.getElementById('desktop'),icons=document.getElementById('icons');
