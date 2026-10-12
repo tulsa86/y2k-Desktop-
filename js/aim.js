@@ -77,6 +77,7 @@ function replyTo(message,person,state){
  state.subject=subject;
  return answer;
 }
+let current=null;
 function tone(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;const c=new A(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(660,c.currentTime);o.frequency.setValueAtTime(880,c.currentTime+.09);g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.21);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.22);o.onended=()=>c.close();}catch{}}
 function open(){
  if(current&&document.contains(current.el)){Y2K.wm.restore(current);return current;}
