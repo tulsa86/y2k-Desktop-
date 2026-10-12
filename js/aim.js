@@ -80,7 +80,7 @@ function replyTo(message,person,state){
 function tone(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;const c=new A(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(660,c.currentTime);o.frequency.setValueAtTime(880,c.currentTime+.09);g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.21);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.22);o.onended=()=>c.close();}catch{}}
 function open(){
  if(current&&document.contains(current.el)){Y2K.wm.restore(current);return current;}
- const win=Y2K.wm.create({title:'Y2K Instant Messenger - Buddy List',icon:'computer',width:310,height:470,render(w){
+ const win=Y2K.wm.create({title:'Y2K Instant Messenger - Buddy List',icon:'messenger',width:310,height:470,render(w){
   w.content.innerHTML='<div class="aim-buddy"><div class="aim-banner"><b>Y2K<span> Instant Messenger</span></b><small>CONNECTED • 56K ONLINE</small></div><div class="aim-account">Screen Name: <strong data-screenname>RetroGuest99</strong> <button data-change-name title="Change your screen name">Edit</button></div><div class="aim-away"><label><input type="checkbox" data-away> Away</label><input data-away-text value="BRB - surfing the web" aria-label="Away message"></div><div class="aim-section">Buddies <small>double-click or tap to chat</small></div><div class="aim-buddy-list" data-buddies></div><div class="aim-section">Chat Rooms</div><div class="aim-buddy-list" data-rooms></div><div class="aim-footer">● Online <span>SIMULATED CHAT • NO REAL USERS</span></div></div>';
  }});
  current=win;
@@ -97,7 +97,7 @@ function open(){
   const key=(isRoom?'room.':'buddy.')+target.id,history=Y2K.storage.read('aim.chat.'+key,[]);
   const entries=Array.isArray(history)?history.filter(x=>x&&typeof x.name==='string'&&typeof x.text==='string').slice(-70):[];
   if(!entries.length)entries.push({name:isRoom?'System':target.name,text:isRoom?'Welcome to '+target.name+'! '+target.topic:(personalities[target.mood]?.intro||'hey there!')});
-  const child=Y2K.wm.create({title:(isRoom?'Chat Room: ':'Instant Message: ')+target.name,icon:'computer',width:460,height:425,owner:win,render(w){
+  const child=Y2K.wm.create({title:(isRoom?'Chat Room: ':'Instant Message: ')+target.name,icon:'messenger',width:460,height:425,owner:win,render(w){
    w.content.innerHTML='<div class="aim-chat"><div class="aim-chat-head"><strong data-heading></strong><span data-subheading></span></div><div class="aim-transcript" data-transcript role="log" aria-live="polite" aria-label="Chat transcript"></div><form class="aim-compose"><label for="aim-message-'+target.id+'">Message:</label><textarea id="aim-message-'+target.id+'" rows="2" maxlength="500" placeholder="Type a message..."></textarea><div class="aim-send-row"><span data-typing></span><button type="submit">Send</button></div></form></div>';
   }});
   const box=child.content,log=box.querySelector('[data-transcript]'),form=box.querySelector('form'),input=form.querySelector('textarea'),typing=box.querySelector('[data-typing]');
@@ -112,5 +112,5 @@ function open(){
   child.onClose=()=>{if(pending)clearTimeout(pending);return true;};
  }
 }
-Y2K.apps.push({id:'aim',title:'Y2K Instant Messenger',icon:'computer',open});
+Y2K.apps.push({id:'aim',title:'Y2K Instant Messenger',icon:'messenger',open});
 })();
