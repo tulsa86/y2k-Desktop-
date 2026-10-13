@@ -2,7 +2,7 @@
 (() => {
  const desktop=document.getElementById('desktop'),icons=document.getElementById('icons'),menu=document.getElementById('programs-menu'),context=document.getElementById('context-menu'),programs=document.getElementById('programs-button');
  let transient=null;
- const gameIds=new Set(['minesweeper','solitaire','freecell','hearts']);
+ const gameIds=new Set(['minesweeper','solitaire','freecell','hearts','elfbowl']);
  const programItems=document.getElementById('program-items');
  const gamesEntry=document.createElement('div');gamesEntry.className='games-entry';
  const gamesToggle=document.createElement('button');gamesToggle.type='button';gamesToggle.className='games-toggle';gamesToggle.setAttribute('aria-expanded','false');gamesToggle.innerHTML=Y2K.icon('folder')+'<span>Games</span><span class="games-arrow">▸</span>';
